@@ -14,8 +14,8 @@ async function main() {
     topic: "orders",
     messages: [
       {
-        key: "125",
-        value: JSON.stringify({ orderId: "125", status: "CREATED" }),
+        key: "131",
+        value: JSON.stringify({ orderId: "131", status: "CREATED" }),
       },
     ],
   });

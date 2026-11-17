@@ -26,8 +26,15 @@ async function main() {
   });
 }
 
-main().catch(async (err) => {
-  console.error(err);
+async function shutdown() {
   await consumer.disconnect();
   process.exit(1);
+}
+
+main().catch(async (err) => {
+  console.error(err);
+  shutdown();
 });
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
