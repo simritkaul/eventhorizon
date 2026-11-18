@@ -73,3 +73,45 @@ npm install               # replaces all the install commands in section 3
 ```
 
 Then recreate the `orders` topic in Kafka UI (1 partition).
+
+## Topics
+
+Create a 3-partition topic (run from repo root; `kafka:19092` because the command runs inside the container):
+
+```bash
+docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka:19092 --create --topic orders-p3 \
+  --partitions 3 --replication-factor 1
+```
+
+Inspect partitions and leaders:
+
+```bash
+docker compose exec kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server kafka:19092 --describe --topic orders-p3
+```
+
+## Consumer groups
+
+Groups are created implicitly when the first consumer with that `groupId` joins.
+
+```bash
+# list groups
+docker compose exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
+  --bootstrap-server kafka:19092 --list
+
+# members, assignments, committed offsets and lag
+docker compose exec kafka /opt/kafka/bin/kafka-consumer-groups.sh \
+  --bootstrap-server kafka:19092 --describe --group p3-group
+```
+
+## Running the Phase 1 scripts (from producer/)
+
+```bash
+npx tsx src/producer-keys.ts   # 9 keyed messages -> orders-p3
+npx tsx src/consumer-p3.ts     # group p3-group, topic from TOPIC env var
+```
+
+## TODO
+
+- After Ctrl+C on a consumer with a SIGINT `disconnect()` handler, survivors still took ~30s to rebalance. Investigate (suspects: npx/tsx signal propagation, handler not running).
